@@ -1,5 +1,6 @@
 ﻿using System.Net.WebSockets;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Serilog;
@@ -28,7 +29,8 @@ public class WebSocketHandler
 
     readonly JsonSerializerOptions options = new()
     {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
     
     public WebSocketHandler(string targetUrl, RequestObject requestObject, TimeSpan requestTimeoutTime)
