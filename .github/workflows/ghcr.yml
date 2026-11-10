@@ -3,7 +3,7 @@ name: Build and push image
 on:
   push:
     tags:
-      - 'kaan-*'
+      - 'custom-*'
   workflow_dispatch:
 
 permissions:
