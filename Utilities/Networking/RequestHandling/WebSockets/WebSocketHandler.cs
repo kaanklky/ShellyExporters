@@ -76,7 +76,9 @@ public class WebSocketHandler
             bool isRetrying = false;
             
             start:
-            
+
+            UpdateRequestJson();
+
             bool sendSuccessful = await Send(requestJson);
 
             if (!sendSuccessful)
@@ -299,16 +301,29 @@ public class WebSocketHandler
 
             string? realm = messageJson.RootElement.GetProperty("realm").GetString();
             
-            authObject = new AuthObject(password!, realm!)
-            {
-                Nonce = messageJson.RootElement.GetProperty("nonce").GetInt32(),
-                Cnonce = 0,
-                nc = messageJson.RootElement.GetProperty("nc").GetInt32()
-            };
+            JsonElement nonceElement = messageJson.RootElement.GetProperty("nonce");
 
-            UpdateRequestJson();
-            
-            log.Debug("Updated serialized request:\n{request}", requestJson);
+            if (nonceElement.ValueKind == JsonValueKind.String)
+            {
+                authObject = new AuthObject(password!, realm!)
+                {
+                    Nonce = nonceElement.GetString(),
+                    Cnonce = 0,
+                    nc = 0,
+                    UsesNonceCount = true
+                };
+            }
+            else
+            {
+                authObject = new AuthObject(password!, realm!)
+                {
+                    Nonce = nonceElement.GetInt32(),
+                    Cnonce = 0,
+                    nc = messageJson.RootElement.GetProperty("nc").GetInt32()
+                };
+            }
+
+            requestObject.AuthObject = authObject;
             return true;
         }
         catch (Exception exception)
